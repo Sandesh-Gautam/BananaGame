@@ -18,28 +18,25 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.HighScores != null && Model.HighScores.Any())
+            @if (Model.LeaderboardEntries != null && Model.LeaderboardEntries.Any())
             {
-                int rank = 1;
-                foreach (var highScore in Model.HighScores)
+                foreach (var entry in Model.LeaderboardEntries)
                 {
                     <tr>
-                        <td>@rank</td>
-                        <td>@highScore.User.Username</td>
-                        <td>@highScore.Score</td>
+                        <td>@entry.Rank</td>
+                        <td>@entry.Username</td>
+                        <td>@entry.Score</td>
                     </tr>
-                    rank++;
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="3">No scores available for this difficulty level.</td>
+                    <td class="text-center" colspan="3">No scores available </td>
                 </tr>
             }
         </tbody>
     </table>
-
 
     <!-- Back to Dashboard Button -->
     <a href="/Game/Dashboard" class="back-button">Back to Dashboard</a>
@@ -98,8 +95,6 @@
             background-color: #444444;
         }
 
- 
-
     .btn {
         padding: 10px 20px;
         font-size: 1rem;
@@ -114,5 +109,4 @@
         .btn:hover {
             background-color: #ffb300;
         }
-
 </style>
