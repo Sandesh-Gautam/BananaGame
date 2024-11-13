@@ -32,6 +32,7 @@ namespace BananaGame.Pages.Game
         public string Feedback { get; set; }
         public bool GameOver { get; set; }
         
+      
         public int Lives { get; set; }
         public int Streak { get; set; }
         // This method retrieves the logged-in user's ID from claims
@@ -98,11 +99,12 @@ namespace BananaGame.Pages.Game
                 {
                     int score = _context.UserStreaks.FirstOrDefault(us => us.UserId == userId)?.Streak ?? 0;
                     score++;
+                
                     Feedback = "Correct!";
                     await UpdateUserStreakAsync(userId, score);
 
                     await UpdateHighScoreAsync(userId, score);
-                    await UpdateLivesAsync(userId, Lives);
+                    
 
                     // Fetch the next question after the correct answer
                     await FetchNewQuestionAsync(userId);
@@ -112,12 +114,16 @@ namespace BananaGame.Pages.Game
                     int lifes = _context.Users.FirstOrDefault(u => u.Id == userId)?.Lives ?? 0;
                     lifes--;
                     Feedback = $"Incorrect. Try again! Lives left: {lifes}";
+                    
+                   
 
                     // Reset score if incorrect
                     int score = _context.UserStreaks.FirstOrDefault(us => us.UserId == userId)?.Streak ?? 0;
-                    score = 0;
+                    int previousScore = ScoreStore.GetValue(userId.ToString());
+                    ScoreStore.SetValue(userId.ToString(), score + previousScore);
+                    
 
-                    await UpdateUserStreakAsync(userId, score);
+                    await UpdateUserStreakAsync(userId, 0);
 
                     // Update lives in the database
                     await UpdateLivesAsync(userId, lifes);
@@ -131,8 +137,8 @@ namespace BananaGame.Pages.Game
                         Feedback = $"Game Over! The correct answer was {Solution}. Your final score is {Streak}. Play again?";
 
                         // Save the game record after the game is over
-                        await SaveGameRecordAsync(userId, Streak);
-
+                        await SaveGameRecordAsync(userId, ScoreStore.GetValue(userId.ToString()));
+                        ScoreStore.SetValue(userId.ToString(), 0);
                         // Update high score at the end of the game (game over scenario)
                         await UpdateHighScoreAsync(userId, Streak);
                     }
@@ -172,12 +178,12 @@ namespace BananaGame.Pages.Game
         }
 
       
-        private async Task SaveGameRecordAsync(int userId, int score)
+        private async Task SaveGameRecordAsync(int userId, int TotalScore)
         {
             var gameRecord = new UserGameRecord
             {
                 UserId = userId,
-                Score = score,
+                Score = TotalScore,
                 DatePlayed = DateTime.Now
             };
 

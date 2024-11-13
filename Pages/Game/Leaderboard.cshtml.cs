@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BananaGame.Pages.Game
 {
+    [Authorize]
     public class LeaderboardModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -22,21 +24,29 @@ namespace BananaGame.Pages.Game
         // This method will fetch the highest scores and corresponding usernames
         public void OnGet()
         {
-            // Fetch top scores from UserGameRecord and include the User information
+            // Fetch the highest score for each user by grouping by UserId
             var topScores = _context.UserGameRecords
                 .Include(ugr => ugr.User)  // Include the User entity to access the username
-                .OrderByDescending(ugr => ugr.Score)  // Order by score descending
-                .Take(10)  // Limit to top 10 scores
+                .GroupBy(ugr => ugr.UserId)  // Group by UserId to get the highest score for each user
+                .Select(group => new
+                {
+                    UserId = group.Key,
+                    Username = group.FirstOrDefault().User.Username, // Get the username for the group
+                    HighScore = group.Max(ugr => ugr.Score)  // Get the highest score in the group
+                })
+                .OrderByDescending(x => x.HighScore)  // Order by the highest score
+                .Take(10)  // Limit to top 10 users
                 .ToList();
 
             // Create a list of LeaderboardEntry objects with rank, username, and score
-            LeaderboardEntries = topScores.Select((ugr, index) => new LeaderboardEntry
+            LeaderboardEntries = topScores.Select((entry, index) => new LeaderboardEntry
             {
                 Rank = index + 1,
-                Username = ugr.User.Username,
-                Score = ugr.Score
+                Username = entry.Username,
+                Score = entry.HighScore
             }).ToList();
         }
+
 
         // A model class to hold the leaderboard data
         public class LeaderboardEntry
