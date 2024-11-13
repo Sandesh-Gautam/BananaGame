@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GuessMaster</title>
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body class="bg-dark text-white">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="/" class="logo-link">
+                    <img src="~/images/puzzle.png" class="logo-img" alt="GuessMaster logo" />
+                    <h1 class="logo-text">Guess Master</h1>
+                </a>
+            </div>
+            <div class="navbar-links">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a href="/Identity/Logout" class="navbar-link">Logout</a>
+                }
+                else
+                {
+                    <a href="/Identity/Login" class="navbar-link">Login</a>
+                    <a href="/Identity/Register" class="navbar-link">Register</a>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="content">
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p class="footer-text">&copy; 2024 GuessMaster. All rights reserved.</p>
+        </div>
+    </footer>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

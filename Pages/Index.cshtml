@@ -1,0 +1,25 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Welcome to GuessMaster";
+}
+
+<head>
+    <link href="~/css/index.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+
+<div class="landing-page">
+    <h1 class="title">Welcome to GuessMaster</h1>
+    <p class="description">
+        GuessMaster is a game where you have to guess a number from an image. The image will show a math problem with the answer hidden by a tomato. Your goal is to guess the number in as few attempts as possible.
+    </p>
+    <p class="description">
+        The game is simple: I'll show you an image with a math problem, and you have to guess the answer.
+    </p>
+
+    <a href="@((User.Identity.IsAuthenticated) ? "/Game/Dashboard" : "/Identity/Login")" class="get-started-btn">
+        Get Started
+    </a>
+
+</div>

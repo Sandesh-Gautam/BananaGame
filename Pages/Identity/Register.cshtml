@@ -1,0 +1,123 @@
+﻿@page
+@model BananaGame.Pages.Identity.RegisterModel
+
+<head>
+    <style>
+        /* General body and background styles */
+        body {
+            background-color: #222222;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* General content styling */
+        .content {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Card container for registration form */
+        .card {
+            background-color: #333333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        /* Title inside the card */
+        .card h2 {
+            color: #FFC400;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form group styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-size: 1rem;
+            color: #FFC400;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #444444;
+            color: #fff;
+            border: 1px solid #FFC400;
+            border-radius: 5px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #FFC400;
+        }
+
+        /* Submit button styling */
+        .submit-button {
+            background-color: #FFC400;
+            color: #222222;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .submit-button:hover {
+            background-color: #e6a800;
+        }
+
+        /* Info text at the bottom */
+        .info-text {
+            text-align: center;
+            color: #fff;
+            margin-top: 15px;
+        }
+
+        .link {
+            color: #FFC400;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<div class="content">
+    <div class="card">
+        <h2>Create a New Account</h2>
+
+        <form method="post">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+
+            <button type="submit" class="submit-button">Register</button>
+        </form>
+
+        <p class="info-text">Already have an account? <a href="../Identity/Login" class="link">Login here</a></p>
+    </div>
+</div>

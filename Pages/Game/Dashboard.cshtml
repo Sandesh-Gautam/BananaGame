@@ -1,0 +1,77 @@
+﻿@page
+@model BananaGame.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-content">
+        <h1>Welcome to the Banana Game</h1>
+
+        <!-- Play the Game Button -->
+        <div class="button-container">
+            <a href="/Game/Game" class="btn btn-play">Play the Game</a>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard">
+            <a href="/Game/Leaderboard" class="btn btn-leaderboard">View Leaderboard</a>
+        </div>
+
+        <!-- Back Button -->
+        <div class="button-container">
+            <a href="/" class="btn btn-back">Back</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard container styling */
+    .dashboard-container {
+
+   
+        background-color: #222222;
+        color: #ffffff;
+    }
+
+    .dashboard-content {
+        text-align: center;
+        max-width: 500px;
+        padding: 20px;
+        border: 1px solid #FFC400;
+        border-radius: 8px;
+    }
+
+        /* Heading styling */
+        .dashboard-content h1 {
+            color: #FFC400;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+    /* Button container styling */
+    .button-container {
+        margin-top: 20px;
+    }
+
+    /* Button styling */
+    .btn {
+        display: inline-block;
+        color: #FFC400;
+        font-size: 1rem;
+        font-weight: bold;
+        text-decoration: none;
+        border: 1px solid #FFC400;
+        border-radius: 4px;
+        padding: 10px 20px;
+        margin: 10px 0;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .btn:hover {
+            background-color: #ffffff;
+            color: #222222;
+        }
+
+  
+</style>

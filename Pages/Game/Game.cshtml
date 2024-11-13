@@ -1,0 +1,40 @@
+﻿@page
+@model BananaGame.Pages.Game.GameModel
+@{
+    ViewData["Title"] = "Game";
+}
+
+<div class="game-container">
+    <h2>Guess the Number</h2>
+
+    <div class="question-section">
+        <img id="questionImage" src="@Model.QuestionImageUrl" alt="Question Image" />
+    </div>
+
+    <div class="game-stats">
+        <p>Lives: <span>@(Model.Lives )</span></p>
+        <p>Streak: <span>@(Model.Streak)</span></p>
+    </div>
+
+    @if (Model.GameOver)
+    {
+        <div class="game-over-message">
+            <p>@Model.Feedback</p>
+            <a href="/Game" class="restart-button">Play Again</a>
+        </div>
+    }
+    else
+    {
+        <div class="feedback-section">
+            <p>Feedback: <span>@Model.Feedback</span></p>
+        </div>
+
+        <form method="post" asp-page-handler="SubmitGuess" class="guess-form">
+            <label for="guessInput">Your Guess:</label>
+            <input type="number" id="guessInput" name="guess" required />
+            <button type="submit" class="submit-guess">Submit Guess</button>
+        </form>
+    }
+</div>
+
+
