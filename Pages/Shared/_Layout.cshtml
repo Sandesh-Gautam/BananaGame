@@ -11,12 +11,14 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-logo">
-                <a href="/" class="logo-link">
-                    <img src="~/images/puzzle.png" class="logo-img" alt="GuessMaster logo" />
-                    <h1 class="logo-text">Guess Master</h1>
-                </a>
-            </div>
+                <div class="navbar-logo">
+                    <a href="Game/Dashboard" class="logo-link">
+                        <img src="~/images/puzzle.png" class="logo-img" alt="GuessMaster logo" />
+                        <h1 class="logo-text">Guess Master</h1>
+                    </a>
+                </div>
+
+         
             <div class="navbar-links">
                 @if (User.Identity.IsAuthenticated)
                 {

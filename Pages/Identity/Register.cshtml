@@ -28,37 +28,37 @@
             width: 100%;
         }
 
-        /* Title inside the card */
-        .card h2 {
-            color: #FFC400;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+            /* Title inside the card */
+            .card h2 {
+                color: #FFC400;
+                font-size: 2rem;
+                margin-bottom: 20px;
+                text-align: center;
+            }
 
         /* Form group styling */
         .form-group {
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            font-size: 1rem;
-            color: #FFC400;
-        }
+            .form-group label {
+                font-size: 1rem;
+                color: #FFC400;
+            }
 
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            background-color: #444444;
-            color: #fff;
-            border: 1px solid #FFC400;
-            border-radius: 5px;
-        }
+            .form-group input {
+                width: 100%;
+                padding: 10px;
+                background-color: #444444;
+                color: #fff;
+                border: 1px solid #FFC400;
+                border-radius: 5px;
+            }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #FFC400;
-        }
+                .form-group input:focus {
+                    outline: none;
+                    border-color: #FFC400;
+                }
 
         /* Submit button styling */
         .submit-button {
@@ -72,8 +72,15 @@
             font-size: 1rem;
         }
 
-        .submit-button:hover {
-            background-color: #e6a800;
+            .submit-button:hover {
+                background-color: #e6a800;
+            }
+
+        /* Error message styling */
+        .error-message {
+            color: #FF6347;
+            font-size: 0.9rem;
+            margin-top: 5px;
         }
 
         /* Info text at the bottom */
@@ -88,9 +95,9 @@
             text-decoration: none;
         }
 
-        .link:hover {
-            text-decoration: underline;
-        }
+            .link:hover {
+                text-decoration: underline;
+            }
     </style>
 </head>
 
@@ -98,22 +105,24 @@
     <div class="card">
         <h2>Create a New Account</h2>
 
-        <form method="post">
+        <form id="registrationForm" method="post">
             <div class="form-group">
                 <label for="fullname">Full Name</label>
                 <input type="text" id="fullname" name="fullname" required>
+                <p class="error-message" id="fullnameError"></p>
             </div>
 
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
+                <p class="error-message" id="usernameError"></p>
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <p class="error-message" id="passwordError"></p>
             </div>
-
 
             <button type="submit" class="submit-button">Register</button>
         </form>
@@ -121,3 +130,44 @@
         <p class="info-text">Already have an account? <a href="../Identity/Login" class="link">Login here</a></p>
     </div>
 </div>
+
+<script>
+    document.getElementById("registrationForm").addEventListener("submit", function (event) {
+        let isValid = true;
+
+        // Full Name validation
+        const fullname = document.getElementById("fullname").value.trim();
+        const fullnameError = document.getElementById("fullnameError");
+        if (fullname.length < 3) {
+            fullnameError.textContent = "Full name must be at least 3 characters.";
+            isValid = false;
+        } else {
+            fullnameError.textContent = "";
+        }
+
+        // Username validation
+        const username = document.getElementById("username").value.trim();
+        const usernameError = document.getElementById("usernameError");
+        if (username.length < 5) {
+            usernameError.textContent = "Username must be at least 5 characters.";
+            isValid = false;
+        } else {
+            usernameError.textContent = "";
+        }
+
+        // Password validation
+        const password = document.getElementById("password").value.trim();
+        const passwordError = document.getElementById("passwordError");
+        if (password.length < 8) {
+            passwordError.textContent = "Password must be at least 8 characters.";
+            isValid = false;
+        } else {
+            passwordError.textContent = "";
+        }
+
+        // Prevent form submission if validation fails
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+</script>

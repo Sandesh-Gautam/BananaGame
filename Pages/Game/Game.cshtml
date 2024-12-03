@@ -1,21 +1,168 @@
 ﻿@page
-@model BananaGame.Pages.Game.GameModel
+@model BananaGame.Pages.GameModel
 @{
     ViewData["Title"] = "Game";
 }
 
-<div class="game-container">
-    <h2>Guess the Number</h2>
+<style>
 
+
+    /* Main content styling */
+    .content {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #333333;
+        padding: 30px;
+        border-radius: 10px;
+       
+    }
+
+    /* Game title */
+    .game-title {
+        color: #FFC400;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Question image section */
+    .question-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Game stats section */
+    .game-stats {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .stat-value {
+        color: #FFC400;
+        font-weight: bold;
+    }
+
+    /* Game Over message */
+    .game-over-message {
+        text-align: center;
+        color: #FF6347;
+        font-size: 1.5rem;
+    }
+
+    .restart-button {
+        background-color: #FFC400;
+        color: #222222;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 15px;
+        display: inline-block;
+    }
+
+        .restart-button:hover {
+            background-color: #e6a800;
+        }
+
+    /* Feedback Section */
+    .feedback-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .feedback-section span {
+            font-weight: bold;
+            color: #FFC400;
+        }
+
+    /* Guess form */
+    .guess-form {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .guess-label {
+        font-size: 1.2rem;
+        color: #FFC400;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .guess-input {
+        padding: 10px;
+        font-size: 1rem;
+        width: 100px;
+        margin-right: 10px;
+        background-color: #444444;
+        color: #ffffff;
+        border: 1px solid #FFC400;
+        border-radius: 5px;
+    }
+
+    .submit-guess {
+        background-color: #FFC400;
+        color: #222222;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .submit-guess:hover {
+            background-color: #e6a800;
+        }
+
+    /* Back button to Dashboard */
+    .back-button {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .back-link {
+        color: #FFC400;
+        font-size: 1rem;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: 1px solid #FFC400;
+        border-radius: 5px;
+    }
+
+        .back-link:hover {
+            background-color: #FFC400;
+            color: #222222;
+        }
+
+</style>
+
+<!-- Main content wrapper -->
+<div class="content">
+    <h2 class="game-title">Guess the Number</h2>
+
+    <!-- Question image section -->
     <div class="question-section">
-        <img id="questionImage" src="@Model.QuestionImageUrl" alt="Question Image" />
+        <img id="questionImage" src="@Model.QuestionImageUrl" alt="Question Image" class="question-image" />
     </div>
 
-    <div class="game-stats">
-        <p>Lives: <span>@(Model.Lives )</span></p>
-        <p>Streak: <span>@(Model.Streak)</span></p>
-    </div>
+    <!-- Game stats section -->
+    @if(Model.GameOver == false)
+    {
+        <div class="game-stats">
+            <p>Lives: <span class="stat-value">@Model.Lives</span></p>
+            <p>Streak: <span class="stat-value">@Model.Streak</span></p>
+        </div>
+    }
 
+
+    <!-- Game Over Section -->
     @if (Model.GameOver)
     {
         <div class="game-over-message">
@@ -25,16 +172,24 @@
     }
     else
     {
+        <!-- Feedback Section -->
         <div class="feedback-section">
             <p>Feedback: <span>@Model.Feedback</span></p>
         </div>
 
+        <!-- Guess form -->
         <form method="post" asp-page-handler="SubmitGuess" class="guess-form">
-            <label for="guessInput">Your Guess:</label>
-            <input type="number" id="guessInput" name="guess" required />
+            <label for="guessInput" class="guess-label">Your Guess:</label>
+            <input type="number" id="guessInput" name="guess" required class="guess-input" />
             <button type="submit" class="submit-guess">Submit Guess</button>
         </form>
     }
+
+    <!-- Back button to dashboard -->
+    <div class="back-button">
+        <a href="/Game/Dashboard" class="back-link">Back to Dashboard</a>
+    </div>
 </div>
+
 
 

@@ -21,7 +21,7 @@ namespace BananaGame.Pages.Identity
             await HttpContext.SignOutAsync();
 
             // Redirect to the home page or any other page after logout
-            return RedirectToPage("/Index");
+            return RedirectToPage("/Game/Dashboard");
         }
         public async Task<IActionResult> OnPostLogoutAsync()
         {

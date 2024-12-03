@@ -57,10 +57,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication(); // Make sure authentication is used
-app.UseAuthorization(); // Ensure authorization is applied
-app.UseSession(); // Enable session state for the application
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+app.UseSession();
 
+app.MapFallbackToPage("/Game/Dashboard");
 app.MapRazorPages(); // Map Razor Pages
 
 
