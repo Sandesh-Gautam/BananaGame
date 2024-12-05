@@ -20,8 +20,8 @@ namespace BananaGame.Migrations
                     Fullname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Lives = table.Column<int>(type: "int", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    Lives = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,7 +97,8 @@ namespace BananaGame.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserHighscores_UserId",
                 table: "UserHighscores",
-                column: "UserId");
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserStreaks_UserId",

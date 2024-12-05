@@ -1,176 +1,88 @@
-using BananaGame.Data; // Importing application data models for database interactions
-using BananaGame.Models; // Importing models for game logic and storage
-using Microsoft.AspNetCore.Authorization; // For handling authorization (user login)
-using Microsoft.AspNetCore.Mvc; // MVC framework for handling web requests and responses
-using Microsoft.AspNetCore.Mvc.RazorPages; // Razor Pages for serving dynamic pages
-using Microsoft.EntityFrameworkCore; // EF Core for database operations
-using Newtonsoft.Json; // For JSON deserialization from external APIs
-using System; // System utilities for handling dates, exceptions, etc.
-using System.Linq; // LINQ queries to manipulate collections
-using System.Net.Http; // HTTP client to make requests to external APIs
-using System.Security.Claims; // For extracting claims (user identity) from the HTTP context
-using System.Threading.Tasks; // Asynchronous programming support
+using BananaGame.Data;
+using BananaGame.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace BananaGame.Pages
 {
-    // This page is only accessible by authorized users (OOP: Authorization/Access Control)
     [Authorize]
     public class GameModel : PageModel
     {
-        private readonly HttpClient _httpClient; // Interoperability: used for making HTTP requests to external services
-        private readonly ApplicationDbContext _context; // Application's database context, an example of dependency injection and interaction with the DB (OOP principle: Inversion of Control)
-        private readonly IHttpContextAccessor _httpContextAccessor; // To access HTTP context and manage user claims (virtual identity)
+        private readonly HttpClient _httpClient;
+        private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // Constructor for injecting dependencies (OOP: Dependency Injection)
         public GameModel(HttpClient httpClient, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
-            _httpClient = httpClient; // Interoperability: HTTP client used for external API requests
-            _context = context; // Database context injected for interacting with the database
-            _httpContextAccessor = httpContextAccessor; // Access HTTP context to retrieve user identity and other session data
+            _httpClient = httpClient;
+            _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        // Properties that represent the current game state and UI feedback
-        public string QuestionImageUrl { get; set; } // Holds the current question (game state)
-        public int Solution { get; set; } // Holds the solution (game logic)
-        public string Feedback { get; set; } // Provides feedback to the player (event-driven interaction with the UI)
-        public bool GameOver { get; set; } // Tracks if the game is over (event-driven)
+        public string QuestionImageUrl { get; set; }
+        public int Solution { get; set; }
+        public string Feedback { get; set; }
+        public bool GameOver { get; set; }
+        public int Lives { get; set; }
+        public int Streak { get; set; }
+        public int HScore { get; set; }
 
-        public int Lives { get; set; } // The number of lives remaining (virtual identity: User's game state)
-        public int Streak { get; set; } // The player's winning streak (game state tied to virtual identity)
-
-        // Retrieves the currently logged-in user's ID (virtual identity) based on claims
         private async Task<int> GetLoggedInUserIdAsync()
         {
-            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier); // Virtual Identity: Extracting user ID from JWT or cookies
+            var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-            if (userIdClaim == null) // Error handling for missing identity (event-driven)
+            if (userIdClaim == null)
             {
                 throw new Exception("User must login.");
             }
 
-            var userId = int.Parse(userIdClaim.Value); // Parsing user ID from the claim (interoperability: claim-based authentication)
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId); // Retrieving the user object from the database (interoperability: DB interaction)
-            if (user == null) // Error handling for non-existent user
+            var userId = int.Parse(userIdClaim.Value);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
             {
                 throw new Exception($"User {userId} does not exist.");
             }
 
-            return userId; // Returning the user's ID for further operations (virtual identity)
+            return userId;
         }
 
-        // Method to initialize the game state when the page is loaded (event-driven programming: user interaction triggers state change)
+       
         public async Task OnGetAsync()
         {
             var userId = await GetLoggedInUserIdAsync();
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user != null)
             {
-                Lives = user.Lives; // Retrieve lives from the database
+                
+                Lives = user.Lives > 0 ? user.Lives : 3;
             }
 
             var userStreak = await _context.UserStreaks.FirstOrDefaultAsync(us => us.UserId == userId);
-            Streak = userStreak?.Streak ?? 0; // Retrieve streak from the database
+            Streak = userStreak?.Streak ?? 0; 
 
-            if (!GameOver) // Initialize the game only if not already game over
+            if (!GameOver) 
             {
                 await FetchNewQuestionAsync(userId);
             }
         }
 
-
-        //Handles the submission of the player's guess (event-driven: user interaction triggers state changes)
-        //public async Task<IActionResult> OnPostSubmitGuessAsync(int guess)
-        //{
-        //    var userId = await GetLoggedInUserIdAsync();
-
-        //    // Retrieve user and streak data
-        //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        //    var userStreak = await _context.UserStreaks.FirstOrDefaultAsync(us => us.UserId == userId);
-
-        //    if (user == null)
-        //    {
-        //        Feedback = "User data not found. Please try again.";
-        //        return Page();
-        //    }
-
-        //    // Load API data from TempData or retain current state
-        //    if (TempData.ContainsKey("QuestionImageUrl") && TempData.ContainsKey("Solution"))
-        //    {
-        //        QuestionImageUrl = TempData["QuestionImageUrl"]?.ToString();
-        //        Solution = int.Parse(TempData["Solution"]?.ToString() ?? "0");
-        //    }
-
-        //    int currentLives = user.Lives; // User's current lives
-        //    int currentStreak = userStreak?.Streak ?? 0; // User's current streak
-
-        //    if (!GameOver)
-        //    {
-        //        if (guess == SolutionStore.GetValue(userId.ToString())) // Correct Prediction
-        //        {
-        //            currentStreak++;
-        //            Feedback = "Predicted Correctly!";
-        //            await UpdateUserStreakAsync(userId, currentStreak);
-        //            await FetchNewQuestionAsync(userId); // Fetch a new question for correct guess
-        //        }
-        //        else // Incorrect Prediction
-        //        {
-        //            currentLives--;
-        //            currentStreak = Math.Max(0, currentStreak - 1); // Ensure streak doesn't go negative
-        //            Feedback = $"Incorrect. Try again! {currentLives} Free Lives remaining.";
-
-        //            await UpdateLivesAsync(userId, currentLives);
-        //            await UpdateUserStreakAsync(userId, currentStreak);
-
-        //            if (currentLives > 0)
-        //            {
-        //                // Retain current question and image
-        //                TempData["QuestionImageUrl"] = QuestionImageUrl;
-        //                TempData["Solution"] = Solution;
-        //            }
-        //            else
-        //            {
-        //                // Game over: Reset and start a new game
-        //                TempData["QuestionImageUrl"] = QuestionImageUrl;
-        //                TempData["Solution"] = Solution;
-        //                GameOver = true;
-        //                Feedback = $"Game Over! The correct answer was {Solution}. Starting a new game.";
-        //                currentLives = 5; // Reset lives
-        //                currentStreak = 0;
-
-        //                await SaveGameRecordAsync(userId, currentStreak);
-        //                await UpdateLivesAsync(userId, currentLives);
-        //                await UpdateUserStreakAsync(userId, currentStreak);
-
-        //                await FetchNewQuestionAsync(userId); // Fetch new question for a new game
-        //            }
-        //        }
-        //    }
-
-        //    // Persist updated game state
-        //    Lives = currentLives;
-        //    Streak = currentStreak;
-
-        //    TempData["QuestionImageUrl"] = QuestionImageUrl;
-        //    TempData["Solution"] = Solution;
-
-        //    return Page();
-        //}
-
         public async Task<IActionResult> OnPostSubmitGuessAsync(int guess)
         {
             var userId = await GetLoggedInUserIdAsync();
 
-            // Retrieve user and streak data
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var userStreak = await _context.UserStreaks.FirstOrDefaultAsync(us => us.UserId == userId);
-
-            if (user == null)
-            {
-                Feedback = "User data not found. Please try again.";
-                return Page();
-            }
+            var userHighscore = await _context.UserHighscores.FirstOrDefaultAsync(us => us.UserId == userId);
 
             // Load API data from TempData or retain current state
             if (TempData.ContainsKey("QuestionImageUrl") && TempData.ContainsKey("Solution"))
@@ -179,22 +91,24 @@ namespace BananaGame.Pages
                 Solution = int.Parse(TempData["Solution"]?.ToString() ?? "0");
             }
 
-            int currentLives = user.Lives; // User's current lives
-            int currentStreak = userStreak?.Streak ?? 0; // User's current streak
+            int currentLives = user.Lives; 
+            int currentStreak = userStreak?.Streak ?? 0;
+            int currentScore = user.Score; 
 
             if (!GameOver)
             {
-                if (guess == SolutionStore.GetValue(userId.ToString())) // Correct Prediction
+                if (guess == SolutionStore.GetValue(userId.ToString()))
                 {
+                    currentScore += 10;               
                     currentStreak++;
                     Feedback = "Predicted Correctly!";
                     await UpdateUserStreakAsync(userId, currentStreak);
-                    await FetchNewQuestionAsync(userId); // Fetch a new question for correct guess
+                    await FetchNewQuestionAsync(userId);
                 }
-                else // Incorrect Prediction
+                else 
                 {
                     currentLives--;
-                    currentStreak = Math.Max(0, currentStreak - 1); // Ensure streak doesn't go negative
+                    currentStreak = 0;
                     Feedback = $"Incorrect. Try again! {currentLives} Free Lives remaining.";
 
                     await UpdateLivesAsync(userId, currentLives);
@@ -203,6 +117,7 @@ namespace BananaGame.Pages
                     if (currentLives > 0)
                     {
                         // Retain current question and image
+                       
                         TempData["QuestionImageUrl"] = QuestionImageUrl;
                         TempData["Solution"] = Solution;
                     }
@@ -210,91 +125,89 @@ namespace BananaGame.Pages
                     {
                         // Game over: Keep current image and solution
                         GameOver = true;
-                        Feedback = $"Game Over! The correct answer was {Solution}. Try again!";
+                     
+                        Feedback = $"Game Over! The correct answer was {Solution}.Your total score is {currentScore} Try again!";
+
+                        // Check if score is greater than the user's high score and update if necessary
+                        if (currentScore > (userHighscore?.Score ?? 0))
+                        {
+                            await UpdateHighScore(userId, currentScore); // Save the high score
+                        }
 
                         // Reset lives and streak for a new game
-                        currentLives = 5; // Reset lives
+                        currentLives = 3; // Reset lives to 3
                         currentStreak = 0; // Reset streak
 
-                        await SaveGameRecordAsync(userId, currentStreak);
+                        await SaveGameRecordAsync(userId, currentScore); // Save game record with total score
+                        currentScore = 0;
                         await UpdateLivesAsync(userId, currentLives);
                         await UpdateUserStreakAsync(userId, currentStreak);
 
                         // Don't fetch a new question if lives are 0
-                        // Remove the new question fetch logic to prevent image and solution change
-                        TempData["QuestionImageUrl"] = QuestionImageUrl;  // Retain the same image
-                        TempData["Solution"] = Solution;  // Retain the same solution
+                        // Retain current question image and solution
+                        TempData["QuestionImageUrl"] = QuestionImageUrl;
+                        TempData["Solution"] = Solution;
                     }
                 }
-            }
-
-            // Persist updated game state
+            }    
             Lives = currentLives;
             Streak = currentStreak;
-
-            // Ensure the image and solution persist even after game over
+            user.Score = currentScore; 
+            await _context.SaveChangesAsync();
             TempData["QuestionImageUrl"] = QuestionImageUrl;
             TempData["Solution"] = Solution;
 
             return Page();
         }
 
-
-
-
-
-
-
-        // Updates the user's high score (game state change: event-driven)
-        private async Task UpdateHighScoreAsync(int userId, int streak)
+        private async Task UpdateHighScore(int userId, int score)
         {
-            var userHighScore = await _context.UserHighscores.FirstOrDefaultAsync(u => u.UserId == userId); // Retrieve the user's high score from DB (interoperability: DB interaction)
+            
+            var userHighscore = await _context.UserHighscores
+                                               .FirstOrDefaultAsync(h => h.UserId == userId);
 
-            if (userHighScore == null) // If no high score is found, create a new entry
+            if (userHighscore != null)
             {
-                userHighScore = new UserHighscore
+                
+                if (score > userHighscore.Score)
                 {
-                    UserId = userId,
-                    Score = streak
-                };
-                _context.UserHighscores.Add(userHighScore); // Add new high score entry (event-driven: state persistence)
+                    userHighscore.Score = score; 
+                    await _context.SaveChangesAsync(); 
+                }
             }
             else
             {
-                if (streak > userHighScore.Score) // If the new streak is higher than the current high score, update it
+                userHighscore = new UserHighscore
                 {
-                    userHighScore.Score = streak;
-                }
+                    UserId = userId,
+                    Score = score
+                };
+                _context.UserHighscores.Add(userHighscore); 
+                await _context.SaveChangesAsync(); 
             }
-
-            await _context.SaveChangesAsync(); // Persist the changes (event-driven)
         }
-
-        // Saves the game record with the total score (game state persistence)
         private async Task SaveGameRecordAsync(int userId, int TotalScore)
         {
             var gameRecord = new UserGameRecord
             {
                 UserId = userId,
                 Score = TotalScore,
-                DatePlayed = DateTime.Now // Date of the game session (event-driven: state persistence)
+                DatePlayed = DateTime.Now 
             };
 
-            _context.UserGameRecords.Add(gameRecord); // Add the record to the database (event-driven)
-            await _context.SaveChangesAsync(); // Persist changes to DB (event-driven)
+            _context.UserGameRecords.Add(gameRecord); 
+            await _context.SaveChangesAsync();
         }
 
-        // Initializes the game (sets the starting state, event-driven interaction with game logic)
         private async Task InitializeGameAsync(int userId)
         {
-            Lives = 5; // Set initial lives
-            GameOver = false; // Reset game over flag
-            Streak = 0; // Reset streak
+            Lives = 3; 
+            GameOver = false; 
+            Streak = 0;
 
-            await FetchNewQuestionAsync(userId); // Fetch the first question
+            await FetchNewQuestionAsync(userId);
         }
 
-        // Fetches a new question from the external API (interoperability: external service)
         private async Task FetchNewQuestionAsync(int userId)
         {
             var apiUrl = "https://marcconrad.com/uob/banana/api.php";
@@ -318,7 +231,6 @@ namespace BananaGame.Pages
             }
         }
 
-        // Updates the user's winning streak (game state persistence)
         private async Task UpdateUserStreakAsync(int userId, int streak)
         {
             var userStreak = await _context.UserStreaks.FirstOrDefaultAsync(us => us.UserId == userId);
@@ -333,29 +245,29 @@ namespace BananaGame.Pages
             }
             else
             {
-                userStreak.Streak = Math.Max(0, streak); // Ensure streak doesn't go below 0
+                userStreak.Streak = Math.Max(0, streak); 
             }
 
             await _context.SaveChangesAsync();
         }
 
 
-        // Updates the user's remaining lives (game state change)
+    
         private async Task UpdateLivesAsync(int userId, int lifelines)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user != null)
             {
-                user.Lives = Math.Max(0, lifelines); // Ensure lives don't go below 0
+                user.Lives = Math.Max(0, lifelines); 
                 await _context.SaveChangesAsync();
             }
         }
 
-        // Inner class to deserialize API responses (OOP: encapsulating response structure)
+       
         public class ApiResponse
         {
-            public string Question { get; set; } // Question received from the API (game state)
-            public int Solution { get; set; } // Solution received from the API (game logic)
+            public string Question { get; set; } 
+            public int Solution { get; set; } 
         }
     }
 }

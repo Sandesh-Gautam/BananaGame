@@ -2,6 +2,9 @@
 @model BananaGame.Pages.Identity.RegisterModel
 
 <head>
+    <!-- FontAwesome for the eye icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
     <style>
         /* General body and background styles */
         body {
@@ -59,6 +62,28 @@
                     outline: none;
                     border-color: #FFC400;
                 }
+
+        /* Eye icon inside the input */
+         .password-container {
+             position: relative;
+             width: 100%;
+         }
+
+             .password-container input {
+                 width: 100%;
+                 
+             }
+             
+
+        .password-icon {
+            position: absolute;
+            right: 2px;
+            top: 65%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #FFC400;
+            font-size: 18px;
+        }
 
         /* Submit button styling */
         .submit-button {
@@ -118,9 +143,10 @@
                 <p class="error-message" id="usernameError"></p>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-container">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <i id="togglePassword" class="fas fa-eye password-icon"></i>
                 <p class="error-message" id="passwordError"></p>
             </div>
 
@@ -132,6 +158,24 @@
 </div>
 
 <script>
+    // Function to toggle the password visibility
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordField = document.getElementById('password');
+        const toggleButton = document.getElementById('togglePassword');
+
+        // Toggle password visibility
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleButton.classList.remove('fa-eye');
+            toggleButton.classList.add('fa-eye-slash'); // Change to eye-slash icon when password is visible
+        } else {
+            passwordField.type = 'password';
+            toggleButton.classList.remove('fa-eye-slash');
+            toggleButton.classList.add('fa-eye'); // Change to eye icon when password is hidden
+        }
+    });
+
+    // Form validation before submitting
     document.getElementById("registrationForm").addEventListener("submit", function (event) {
         let isValid = true;
 

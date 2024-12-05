@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BananaGame.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241113104959_InitialMigration")]
+    [Migration("20241205132655_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -44,7 +44,7 @@ namespace BananaGame.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Role")
+                    b.Property<int>("Score")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")
@@ -96,7 +96,8 @@ namespace BananaGame.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("UserHighscores");
                 });
@@ -137,8 +138,8 @@ namespace BananaGame.Migrations
             modelBuilder.Entity("BananaGame.Models.UserHighscore", b =>
                 {
                     b.HasOne("BananaGame.Models.User", "User")
-                        .WithMany("Highscores")
-                        .HasForeignKey("UserId")
+                        .WithOne("Highscore")
+                        .HasForeignKey("BananaGame.Models.UserHighscore", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -160,7 +161,8 @@ namespace BananaGame.Migrations
                 {
                     b.Navigation("GameRecords");
 
-                    b.Navigation("Highscores");
+                    b.Navigation("Highscore")
+                        .IsRequired();
 
                     b.Navigation("Streak")
                         .IsRequired();

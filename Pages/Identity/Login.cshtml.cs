@@ -9,22 +9,26 @@ using BananaGame.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using BananaGame.Services;
 
 namespace BananaGame.Pages.Identity
 {
     public class LoginModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly JwtService _jwtService;
 
-        public LoginModel(ApplicationDbContext context)
+        public LoginModel(ApplicationDbContext context, JwtService jwtService)
         {
             _context = context;
+            _jwtService = jwtService;
         }
 
         [BindProperty]
         public LoginInput Input { get; set; }
 
         public string Message { get; set; }
+        public string JwtToken { get; private set; }
 
         public class LoginInput
         {
@@ -55,21 +59,32 @@ namespace BananaGame.Pages.Identity
                 return Page();
             }
 
+            // Generate JWT Token
+            JwtToken = _jwtService.GenerateJwtToken(user.Username);
+
+            // Create claims for cookie authentication
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) 
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim("FullName", user.Fullname),
+            
+                new Claim("LoginTime", DateTime.UtcNow.ToString()) // Track login time
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            // Sign in the user
+            // Sign in the user with cookies
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            // Optionally, store JWT in a cookie or return it in the response for API use
+            // Example: Cookie for JWT
+            Response.Cookies.Append("JwtToken", JwtToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict });
 
             Message = "Login successful!";
             return RedirectToPage("/Game/Dashboard");
         }
-
 
         // Verify the password by extracting the salt and hashing the provided password
         private bool VerifyPassword(string providedPassword, string storedPassword)

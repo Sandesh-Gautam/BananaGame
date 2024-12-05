@@ -41,7 +41,7 @@ namespace BananaGame.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Role")
+                    b.Property<int>("Score")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")
@@ -93,7 +93,8 @@ namespace BananaGame.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("UserHighscores");
                 });
@@ -134,8 +135,8 @@ namespace BananaGame.Migrations
             modelBuilder.Entity("BananaGame.Models.UserHighscore", b =>
                 {
                     b.HasOne("BananaGame.Models.User", "User")
-                        .WithMany("Highscores")
-                        .HasForeignKey("UserId")
+                        .WithOne("Highscore")
+                        .HasForeignKey("BananaGame.Models.UserHighscore", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -157,7 +158,8 @@ namespace BananaGame.Migrations
                 {
                     b.Navigation("GameRecords");
 
-                    b.Navigation("Highscores");
+                    b.Navigation("Highscore")
+                        .IsRequired();
 
                     b.Navigation("Streak")
                         .IsRequired();

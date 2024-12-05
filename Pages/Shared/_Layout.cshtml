@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -18,18 +20,21 @@
                     </a>
                 </div>
 
-         
+
             <div class="navbar-links">
-                @if (User.Identity.IsAuthenticated)
+                @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
                 {
+                    <p class="user-greeting"> @User.Identity.Name</p>
                     <a href="/Identity/Logout" class="navbar-link">Logout</a>
-                }
+                }   
                 else
                 {
                     <a href="/Identity/Login" class="navbar-link">Login</a>
                     <a href="/Identity/Register" class="navbar-link">Register</a>
+                    
                 }
             </div>
+
         </div>
     </nav>
 

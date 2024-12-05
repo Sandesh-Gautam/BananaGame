@@ -1,8 +1,13 @@
 using BananaGame.Data;
 using BananaGame.Services;
+
+//using BananaGame.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +20,21 @@ builder.Services.AddHttpClient();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+        };
+    });
+
 // Add Session services with a 1-day timeout
 builder.Services.AddSession(options =>
 {
@@ -25,16 +45,7 @@ builder.Services.AddSession(options =>
 
 // Register IHttpContextAccessor as Singleton 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-// Register RoleAuthorizationHandler as Scoped, because it depends on ApplicationDbContext (which is Scoped)
-builder.Services.AddScoped<IAuthorizationHandler, RoleAuthorizationHandler>();
-
-
-// Add Authorization services
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("UserRolePolicy", policy => policy.Requirements.Add(new RolesRequirement("User")));
-});
+builder.Services.AddSingleton<JwtService>();
 
 // Add Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

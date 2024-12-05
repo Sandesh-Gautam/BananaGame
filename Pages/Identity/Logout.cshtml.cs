@@ -20,19 +20,10 @@ namespace BananaGame.Pages.Identity
             // Sign out the user
             await HttpContext.SignOutAsync();
 
-            // Redirect to the home page or any other page after logout
+           
             return RedirectToPage("/Game/Dashboard");
         }
-        public async Task<IActionResult> OnPostLogoutAsync()
-        {
-            // Clear the session data
-            HttpContext.Session.Clear();  
 
-          
-
-            // Redirect to the login page or home page
-            return RedirectToPage("/Account/Login");
-        }
 
     }
 }
