@@ -1,4 +1,3 @@
-using BananaGame.Data;
 using BananaGame.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
